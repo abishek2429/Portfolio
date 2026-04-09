@@ -83,7 +83,7 @@ export default function DemoOne() {
           .sort((a, b) => a.date.localeCompare(b.date))
 
         const dayMap = new Map(normalized.map((entry) => [entry.date, entry]))
-        const latestDate = normalized.at(-1)?.date
+        const latestDate = normalized.length ? normalized[normalized.length - 1].date : undefined
         const endDate = latestDate ? new Date(`${latestDate}T00:00:00Z`) : new Date()
 
         const totalDays = CALENDAR_WEEKS * DAYS_PER_WEEK

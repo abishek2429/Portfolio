@@ -3,7 +3,6 @@ var config = {
         "./index.html",
         "./src/**/*.{js,ts,jsx,tsx}",
         "./components/**/*.{js,ts,jsx,tsx}",
-        "./demo.tsx",
     ],
     theme: {
         extend: {},

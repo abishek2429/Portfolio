@@ -16,6 +16,6 @@
       "@/*": ["./*"]
     }
   },
-  "include": ["src", "components", "lib", "demo.tsx"],
+  "include": ["src", "components", "lib"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

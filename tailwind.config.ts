@@ -5,7 +5,6 @@ const config: Config = {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
     "./components/**/*.{js,ts,jsx,tsx}",
-    "./demo.tsx",
   ],
   theme: {
     extend: {},

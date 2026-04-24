@@ -2,6 +2,33 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  color-scheme: dark;
+  --bg-deep: #04040d;
+  --bg-panel: rgba(8, 10, 20, 0.72);
+  --stroke: rgba(255, 255, 255, 0.1);
+  --cyan: #4af3ff;
+  --gold: #f5c842;
+  --green: #3ddc84;
+  --red: #ff4d4d;
+}
+
+@font-face {
+  font-family: "Orbitron";
+  font-style: normal;
+  font-weight: 400 800;
+  font-display: swap;
+  src: local("Orbitron");
+}
+
+@font-face {
+  font-family: "Share Tech Mono";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local("Share Tech Mono");
+}
+
 @keyframes rise {
   from {
     opacity: 0;
@@ -13,15 +40,6 @@
   }
 }
 
-@keyframes fade {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
 @keyframes float {
   0%,
   100% {
@@ -29,15 +47,6 @@
   }
   50% {
     transform: translateY(-14px) translateX(6px);
-  }
-}
-
-@keyframes marquee {
-  from {
-    transform: translateX(0);
-  }
-  to {
-    transform: translateX(-33.333%);
   }
 }
 
@@ -53,36 +62,228 @@
   }
 }
 
-.anim-rise {
-  animation: rise 900ms cubic-bezier(0.2, 0.65, 0.2, 1) both;
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
-.anim-rise-delayed {
-  animation: rise 1050ms cubic-bezier(0.2, 0.65, 0.2, 1) 220ms both;
+@keyframes orbit {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
 }
 
-.anim-fade {
-  animation: fade 1100ms ease both;
+@keyframes warp {
+  from {
+    transform: translate(-50%, -50%) translateX(0);
+    opacity: 0.2;
+  }
+  to {
+    transform: translate(-50%, -50%) translateX(-120vw);
+    opacity: 0;
+  }
 }
 
-.anim-float {
+@keyframes ringPulse {
+  0%,
+  100% {
+    transform: scale(0.92);
+    opacity: 0.55;
+  }
+  50% {
+    transform: scale(1.06);
+    opacity: 1;
+  }
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  20% {
+    transform: translate3d(-4px, 2px, 0);
+  }
+  40% {
+    transform: translate3d(4px, -2px, 0);
+  }
+  60% {
+    transform: translate3d(-2px, -3px, 0);
+  }
+  80% {
+    transform: translate3d(3px, 2px, 0);
+  }
+}
+
+.font-display {
+  font-family: "Orbitron", "Segoe UI", sans-serif;
+}
+
+.font-mono {
+  font-family: "Share Tech Mono", "Consolas", monospace;
+}
+
+.star-twinkle {
+  animation: twinkle 4.5s ease-in-out infinite;
+}
+
+.planet-orbit {
+  animation: orbit linear infinite;
+  transition: transform 240ms ease, border-color 240ms ease, box-shadow 240ms ease;
+}
+
+.planet-orbit:hover .planet-core,
+.planet-orbit-active .planet-core {
+  box-shadow: 0 0 0 12px rgba(255, 255, 255, 0.04), 0 0 42px rgba(74, 243, 255, 0.18);
+}
+
+.planet-core {
+  transition: transform 220ms ease, box-shadow 220ms ease;
+}
+
+.planet-core:hover {
+  transform: translateX(-50%) translateY(-50%) scale(1.05);
+}
+
+.moon-orbit {
+  animation: orbit 7s linear infinite reverse;
+  transform-origin: 2.5rem 0.06rem;
+}
+
+.pulse-ring {
+  animation: ringPulse 2.4s ease-in-out infinite;
+}
+
+.warp-streak {
+  animation: warp 0.8s linear infinite;
+}
+
+.black-hole-core {
+  animation: pulseSoft 2s ease-in-out infinite;
+}
+
+.black-hole-ring {
+  animation: orbit 5s linear infinite;
+}
+
+.space-stage {
+  transform: perspective(1200px) rotateX(var(--tilt-x)) rotateY(var(--tilt-y));
+  will-change: transform;
+}
+
+.sun-core {
+  animation: pulseSoft 4s ease-in-out infinite;
+}
+
+.sun-glow {
   animation: float 8s ease-in-out infinite;
 }
 
-.anim-float-slow {
-  animation: float 11s ease-in-out infinite;
+.toast-card {
+  animation: rise 520ms cubic-bezier(0.2, 0.65, 0.2, 1) both;
 }
 
-.anim-pulse-soft {
-  animation: pulseSoft 2.2s ease-in-out infinite;
+.panel {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--stroke);
+  background: var(--bg-panel);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.28);
 }
 
-.marquee-track {
-  animation: marquee 24s linear infinite;
+@media (max-width: 900px) {
+  .panel {
+    backdrop-filter: blur(6px);
+  }
 }
 
-.marquee-track:hover {
-  animation-play-state: paused;
+.panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at top left, rgba(255, 255, 255, 0.09), transparent 32%);
+  opacity: 0.7;
+}
+
+.space-sky,
+.space-vignette,
+.space-scanlines,
+.space-noise {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+.space-sky {
+  background:
+    radial-gradient(circle at 15% 20%, rgba(74, 243, 255, 0.1), transparent 18%),
+    radial-gradient(circle at 80% 10%, rgba(245, 200, 66, 0.09), transparent 20%),
+    radial-gradient(circle at 55% 75%, rgba(61, 220, 132, 0.08), transparent 20%),
+    linear-gradient(180deg, #050712 0%, #04040d 56%, #02030a 100%);
+}
+
+.space-vignette {
+  background: radial-gradient(circle at center, transparent 32%, rgba(0, 0, 0, 0.55) 100%);
+}
+
+.space-scanlines {
+  opacity: 0.18;
+  background-image: linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 100% 4px;
+}
+
+.space-noise {
+  opacity: 0.05;
+  background-image: linear-gradient(90deg, rgba(255, 255, 255, 0.12) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.12) 1px, transparent 1px);
+  background-size: 24px 24px;
+  mix-blend-mode: screen;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg-deep);
+  font-family: "Share Tech Mono", "Consolas", monospace;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: rgba(74, 243, 255, 0.25);
+  color: white;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 :root {

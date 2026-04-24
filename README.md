@@ -6,7 +6,7 @@ This project now includes a React + TypeScript + Tailwind setup with shadcn-styl
 
 - components/ui/liquid-glass-button.tsx
 - lib/utils.ts
-- demo.tsx
+- src/SpaceExplorer.tsx
 
 ## Project Support Status
 
@@ -69,7 +69,7 @@ Default paths in a typical shadcn + Next setup:
 
 1. Structure and dependencies
 - LiquidButton uses Slot, cva, and cn.
-- DemoOne now uses layered CSS motion and includes lucide-react icons.
+- SpaceExplorer now renders the mission-control and solar-system portfolio experience.
 
 2. Arguments and state
 - LiquidButton supports variant, size, className, and native button props.

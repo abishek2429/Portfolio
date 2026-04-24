@@ -1,11 +1,7 @@
-import DemoOne from "@/demo"
+import SpaceExplorer from "./SpaceExplorer"
 
 function App() {
-  return (
-    <div className="min-h-screen bg-black text-white">
-      <DemoOne />
-    </div>
-  )
+  return <SpaceExplorer />
 }
 
 export default App

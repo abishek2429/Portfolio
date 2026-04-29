@@ -8,4 +8,15 @@ export default defineConfig({
             "@": fileURLToPath(new URL(".", import.meta.url)),
         },
     },
+    build: {
+        chunkSizeWarningLimit: 1500, // Supress the 500kb warning limit (three.js is large)
+        rollupOptions: {
+            output: {
+                manualChunks: {
+                    three: ['three'],
+                    'react-three': ['@react-three/fiber', '@react-three/drei'],
+                }
+            }
+        }
+    }
 });

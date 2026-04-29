@@ -1,402 +1,423 @@
-import { useEffect, useMemo, useRef, useState } from "react"
-import { Canvas, useFrame, useThree } from "@react-three/fiber"
-import { Html, Stars } from "@react-three/drei"
-import * as THREE from "three"
-import { ArrowUpRight, MapPinned, Rocket } from "lucide-react"
+import { Suspense, useState, useCallback, useEffect, useRef } from "react"
+import { Canvas } from "@react-three/fiber"
+import LaunchOverlay from "./LaunchOverlay"
+import SpaceScene from "./SpaceScene"
+import JourneyProgress from "./JourneyProgress"
+import { SECTIONS, STOPS } from "./data"
 
-type SectionId = "home" | "missions" | "skills" | "contact"
-
-type Planet = {
-  id: SectionId
-  name: string
-  color: string
-  position: [number, number, number]
-  radius: number
-  description: string
-}
-
-const planets: Planet[] = [
-  {
-    id: "home",
-    name: "Home",
-    color: "#3ddc84",
-    position: [0, 0, 0],
-    radius: 1.8,
-    description: "Commander dossier and identity core.",
-  },
-  {
-    id: "missions",
-    name: "Missions",
-    color: "#f5c842",
-    position: [20, 1, -14],
-    radius: 2.3,
-    description: "Project log and shipped outcomes.",
-  },
-  {
-    id: "skills",
-    name: "Skills",
-    color: "#4af3ff",
-    position: [-18, -1, -30],
-    radius: 2.0,
-    description: "Capability constellation and tool stack.",
-  },
-  {
-    id: "contact",
-    name: "Contact",
-    color: "#ff5f5f",
-    position: [10, 0, -48],
-    radius: 2.4,
-    description: "Recruitment transmission node.",
-  },
-]
-
-const sectionContent: Record<SectionId, { title: string; lines: string[] }> = {
-  home: {
-    title: "Abishek S",
-    lines: [
-      "Full-Stack Developer and UI/UX Designer",
-      "Coimbatore, Tamil Nadu, India",
-      "Builds product-focused interfaces and complete systems",
-    ],
-  },
-  missions: {
-    title: "Mission Log",
-    lines: [
-      "OrbitUI - accessible component system",
-      "NightOwl - focus app with retention",
-      "Mappr - data visualization tool",
-      "Pulseboard - real-time analytics cockpit",
-    ],
-  },
-  skills: {
-    title: "Skill Constellation",
-    lines: [
-      "React, TypeScript, Node.js, Next.js",
-      "Tailwind CSS, Figma, design systems",
-      "GitHub, Docker, Linux, PostgreSQL",
-      "Learning Three.js and Rust",
-    ],
-  },
-  contact: {
-    title: "Transmission Hub",
-    lines: [
-      "Email: abishek02781@gmail.com",
-      "GitHub: github.com/abishek2429",
-      "LinkedIn: linkedin.com/in/abishek-s-a86209247",
-      "Open for full-time, freelance, and collaboration",
-    ],
-  },
-}
-
-function PlanetNode({ planet, active, unlocked }: { planet: Planet; active: boolean; unlocked: boolean }) {
-  const mesh = useRef<THREE.Mesh>(null)
-
-  useFrame((state) => {
-    if (!mesh.current) return
-    mesh.current.rotation.y += 0.003
-    mesh.current.position.y = planet.position[1] + Math.sin(state.clock.elapsedTime * 1.3 + planet.radius) * 0.2
-  })
-
-  return (
-    <group position={planet.position}>
-      <mesh ref={mesh}>
-        <sphereGeometry args={[planet.radius, 36, 36]} />
-        <meshStandardMaterial
-          color={planet.color}
-          emissive={active ? planet.color : "#000000"}
-          emissiveIntensity={active ? 0.9 : 0.25}
-          roughness={0.45}
-          metalness={0.15}
-        />
-      </mesh>
-
-      <mesh>
-        <sphereGeometry args={[planet.radius * 1.55, 20, 20]} />
-        <meshBasicMaterial color={planet.color} transparent opacity={0.08} />
-      </mesh>
-
-      <Html center position={[0, planet.radius + 1.55, 0]} distanceFactor={10}>
-        <div
-          className="rounded-full border border-white/25 bg-black/60 px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-white"
-          style={{ boxShadow: active ? `0 0 24px ${planet.color}` : "none" }}
-        >
-          {planet.name} {unlocked ? "Unlocked" : "Locked"}
-        </div>
-      </Html>
-    </group>
-  )
-}
-
-function Ship({ position }: { position: THREE.Vector3 }) {
-  const group = useRef<THREE.Group>(null)
-
-  useFrame((state) => {
-    if (!group.current) return
-    group.current.position.copy(position)
-    group.current.rotation.y = Math.sin(state.clock.elapsedTime * 2.5) * 0.08
-    group.current.position.y += Math.sin(state.clock.elapsedTime * 8) * 0.06
-  })
-
-  return (
-    <group ref={group}>
-      <mesh>
-        <capsuleGeometry args={[0.55, 1.4, 8, 16]} />
-        <meshStandardMaterial color="#eff9ff" metalness={0.8} roughness={0.25} />
-      </mesh>
-      <mesh position={[0, 0.55, 0.25]}>
-        <sphereGeometry args={[0.28, 24, 24]} />
-        <meshStandardMaterial color="#4af3ff" emissive="#4af3ff" emissiveIntensity={1.3} />
-      </mesh>
-      <mesh position={[0, -0.95, 0]}>
-        <coneGeometry args={[0.34, 0.9, 10]} />
-        <meshStandardMaterial color="#f5c842" emissive="#f5c842" emissiveIntensity={0.8} />
-      </mesh>
-    </group>
-  )
-}
-
-function CameraRig({ target }: { target: THREE.Vector3 }) {
-  const { camera } = useThree()
-
-  useFrame((_, delta) => {
-    const desired = new THREE.Vector3(target.x, target.y + 4.8, target.z + 11.5)
-    camera.position.lerp(desired, Math.min(delta * 3.2, 1))
-    camera.lookAt(target.x, target.y + 0.5, target.z - 7)
-  })
-
-  return null
-}
-
-function SpaceScene({
-  shipPosition,
-  activeSection,
-  unlocked,
+/* ─────────────────────────────────────────────────────
+   PLANET MODAL  — opens when user clicks a planet
+   ───────────────────────────────────────────────────── */
+function PlanetModal({
+  sectionId,
+  onClose,
 }: {
-  shipPosition: THREE.Vector3
-  activeSection: SectionId
-  unlocked: Record<SectionId, boolean>
+  sectionId: string | null
+  onClose: () => void
 }) {
-  const debris = useMemo(
-    () =>
-      Array.from({ length: 180 }, (_, index) => {
-        const x = ((index * 11) % 90) - 45
-        const y = ((index * 7) % 18) - 9
-        const z = -((index * 17) % 110)
-        return [x, y, z] as [number, number, number]
-      }),
-    []
+  const s = SECTIONS.find((x) => x.id === sectionId)
+  const visible = !!s
+
+  /* close on Escape */
+  useEffect(() => {
+    if (!visible) return
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose() }
+    window.addEventListener("keydown", onKey)
+    return () => window.removeEventListener("keydown", onKey)
+  }, [visible, onClose])
+
+  return (
+    /* Backdrop */
+    <div
+      onClick={onClose}
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 60,
+        background: "rgba(0,0,0,0.55)",
+        backdropFilter: "blur(6px)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        opacity: visible ? 1 : 0,
+        pointerEvents: visible ? "auto" : "none",
+        transition: "opacity 0.3s ease",
+      }}
+    >
+      {s && (
+        /* Modal card — stop click from closing */
+        <div
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            width: "min(640px, 92vw)",
+            maxHeight: "88vh",
+            overflowY: "auto",
+            background: "rgba(5,6,22,0.96)",
+            border: `1px solid ${s.color}35`,
+            borderRadius: "24px",
+            boxShadow: `0 0 80px ${s.color}22, 0 40px 80px rgba(0,0,0,0.7)`,
+            transform: visible ? "translateY(0) scale(1)" : "translateY(32px) scale(0.97)",
+            transition: "transform 0.35s cubic-bezier(0.2,0.8,0.2,1)",
+            fontFamily: "'Space Grotesk', sans-serif",
+            position: "relative",
+          }}
+        >
+          {/* Colour top bar */}
+          <div style={{
+            height: "4px",
+            borderRadius: "24px 24px 0 0",
+            background: `linear-gradient(to right, ${s.color}, ${s.color}44, transparent)`,
+          }} />
+
+          {/* Header */}
+          <div style={{ padding: "28px 32px 0" }}>
+            <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
+              <div>
+                {/* Badge */}
+                <div style={{
+                  display: "inline-flex", alignItems: "center", gap: 6,
+                  padding: "3px 12px", borderRadius: 999,
+                  border: `1px solid ${s.color}45`, background: `${s.color}14`,
+                  fontSize: 9, letterSpacing: "0.3em", color: s.color,
+                  textTransform: "uppercase", marginBottom: 14,
+                  fontFamily: "'Share Tech Mono', monospace",
+                }}>
+                  {s.icon} {s.content.badge}
+                </div>
+                {/* Title */}
+                <div style={{
+                  fontSize: "clamp(24px,4vw,34px)", fontWeight: 800,
+                  color: "#fff", lineHeight: 1.1, marginBottom: 6,
+                  fontFamily: "'Orbitron', sans-serif",
+                }}>
+                  {s.content.title}
+                </div>
+                {/* Subtitle */}
+                <div style={{
+                  fontSize: 12, color: "rgba(255,255,255,0.45)", marginBottom: 24,
+                  fontFamily: "'Share Tech Mono', monospace", letterSpacing: "0.06em",
+                }}>
+                  {s.content.subtitle}
+                </div>
+              </div>
+
+              {/* Close button */}
+              <button
+                onClick={onClose}
+                style={{
+                  width: 36, height: 36, borderRadius: "50%",
+                  border: "1px solid rgba(255,255,255,0.18)",
+                  background: "rgba(255,255,255,0.06)",
+                  color: "rgba(255,255,255,0.7)", fontSize: 16,
+                  cursor: "pointer", flexShrink: 0,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  marginTop: 4,
+                }}
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Divider */}
+            <div style={{
+              height: 1,
+              background: `linear-gradient(to right, ${s.color}55, transparent)`,
+              marginBottom: 20,
+            }} />
+          </div>
+
+          {/* Detail items */}
+          <div style={{ padding: "0 32px 32px", display: "flex", flexDirection: "column", gap: 10 }}>
+            {s.content.items.map((item, i) => (
+              <div key={i} style={{
+                display: "flex", alignItems: "flex-start", gap: 14,
+                padding: "14px 16px", borderRadius: 14,
+                background: `${s.color}0d`, border: `1px solid ${s.color}1e`,
+                fontSize: 14, color: "rgba(255,255,255,0.88)", lineHeight: 1.5,
+              }}>
+                <span style={{ fontSize: 20, flexShrink: 0 }}>{item.icon}</span>
+                <span>{item.text}</span>
+              </div>
+            ))}
+
+            {/* Contact links if this is the contact section */}
+            {s.id === "contact" && (
+              <div style={{ display: "flex", gap: 10, marginTop: 8, flexWrap: "wrap" }}>
+                <a href="mailto:abishek02781@gmail.com" style={linkStyle("#3ddc84")}>📧 Email</a>
+                <a href="https://github.com/abishek2429" target="_blank" rel="noreferrer" style={linkStyle("#fff")}>💻 GitHub</a>
+                <a href="https://linkedin.com/in/abishek-s-a86209247" target="_blank" rel="noreferrer" style={linkStyle("#60a5fa")}>🔗 LinkedIn</a>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
   )
+}
+
+function linkStyle(color: string): React.CSSProperties {
+  return {
+    display: "inline-flex", alignItems: "center", gap: 6,
+    padding: "8px 18px", borderRadius: 999,
+    border: `1px solid ${color}40`, background: `${color}14`,
+    color, fontSize: 11, fontFamily: "'Share Tech Mono', monospace",
+    letterSpacing: "0.18em", textDecoration: "none",
+    transition: "background 0.2s",
+  }
+}
+
+/* ─────────────────────────────────────────────────────
+   TOP HUD
+   ───────────────────────────────────────────────────── */
+function TopHud({ currentIndex, cameraT }: { currentIndex: number; cameraT: number }) {
+  const pct = Math.round(Math.min(cameraT / (STOPS[STOPS.length - 1] || 1), 1) * 100)
+  const s   = currentIndex > 0 ? SECTIONS[currentIndex - 1] : SECTIONS[0]
 
   return (
     <>
-      <color attach="background" args={["#050814"]} />
-      <fog attach="fog" args={["#050814", 18, 140]} />
-      <ambientLight intensity={0.5} />
-      <directionalLight position={[12, 10, 8]} intensity={1.15} color="#dbeeff" />
-      <pointLight position={[0, 0, 0]} intensity={80} distance={160} color="#4af3ff" />
+      <div className="hud-panel" style={{ position: "fixed", top: 18, left: 24, zIndex: 20, pointerEvents: "none", minWidth: 230 }}>
+        <div className="hud-label">Commander</div>
+        <div className="font-orbitron" style={{ fontSize: "clamp(15px,2vw,20px)", fontWeight: 700 }}>ABISHEK S</div>
+        <div className="font-mono" style={{ fontSize: 10, color: "rgba(255,255,255,0.42)", marginTop: 4 }}>
+          FULL-STACK DEV · UI/UX DESIGNER
+        </div>
+      </div>
 
-      <Stars radius={150} depth={100} count={5000} factor={6} saturation={0.2} fade speed={0.55} />
-
-      {debris.map((position, index) => (
-        <mesh key={index} position={position}>
-          <sphereGeometry args={[0.05 + (index % 3) * 0.04, 6, 6]} />
-          <meshBasicMaterial color={index % 2 === 0 ? "#4af3ff" : "#f5c842"} transparent opacity={0.5} />
-        </mesh>
-      ))}
-
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -2.8, -24]}>
-        <planeGeometry args={[220, 220, 1, 1]} />
-        <meshStandardMaterial color="#09111d" roughness={1} metalness={0} />
-      </mesh>
-
-      <mesh position={[0, 0, -24]}>
-        <sphereGeometry args={[9, 32, 32]} />
-        <meshStandardMaterial color="#f5c842" emissive="#f5c842" emissiveIntensity={1.2} />
-      </mesh>
-
-      {planets.map((planet) => (
-        <PlanetNode
-          key={planet.id}
-          planet={planet}
-          active={planet.id === activeSection}
-          unlocked={unlocked[planet.id]}
-        />
-      ))}
-
-      <Ship position={shipPosition} />
-      <CameraRig target={shipPosition} />
+      <div className="hud-panel" style={{ position: "fixed", top: 18, right: 54, zIndex: 20, pointerEvents: "none", textAlign: "right", minWidth: 110 }}>
+        <div className="hud-label" style={{ textAlign: "right" }}>Journey</div>
+        <div className="font-orbitron" style={{ fontSize: 18, fontWeight: 700, color: "var(--gold)" }}>{pct}%</div>
+        <div className="font-mono" style={{ fontSize: 10, color: s.color, marginTop: 3 }}>
+          {s.icon} {s.name.toUpperCase()}
+        </div>
+      </div>
     </>
   )
 }
 
-function App() {
-  const [shipPosition, setShipPosition] = useState(() => new THREE.Vector3(0, 0, 8))
-  const [activeSection, setActiveSection] = useState<SectionId>("home")
-  const [unlocked, setUnlocked] = useState<Record<SectionId, boolean>>({
-    home: true,
-    missions: false,
-    skills: false,
-    contact: false,
+/* ─────────────────────────────────────────────────────
+   NAV ARROWS + DOTS
+   ───────────────────────────────────────────────────── */
+function NavArrows({
+  currentIndex,
+  onNav,
+  locked,
+}: {
+  currentIndex: number
+  onNav: (dir: 1 | -1) => void
+  locked: boolean
+}) {
+  const canPrev = currentIndex > 0
+  const canNext = currentIndex < STOPS.length - 1
+
+  const btn = (active: boolean): React.CSSProperties => ({
+    width: 44, height: 44, borderRadius: "50%",
+    border: `1px solid rgba(255,255,255,${active && !locked ? 0.28 : 0.07})`,
+    background: `rgba(255,255,255,${active && !locked ? 0.08 : 0.02})`,
+    color: `rgba(255,255,255,${active && !locked ? 0.95 : 0.18})`,
+    fontSize: 18, cursor: active && !locked ? "pointer" : "default",
+    display: "flex", alignItems: "center", justifyContent: "center",
+    backdropFilter: "blur(10px)", transition: "all 0.2s", userSelect: "none",
+    pointerEvents: active && !locked ? "auto" : "none",
   })
-  const keys = useRef(new Set<string>())
-
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      keys.current.add(event.key.toLowerCase())
-    }
-
-    const onKeyUp = (event: KeyboardEvent) => {
-      keys.current.delete(event.key.toLowerCase())
-    }
-
-    window.addEventListener("keydown", onKeyDown)
-    window.addEventListener("keyup", onKeyUp)
-    return () => {
-      window.removeEventListener("keydown", onKeyDown)
-      window.removeEventListener("keyup", onKeyUp)
-    }
-  }, [])
-
-  useEffect(() => {
-    let raf = 0
-
-    const step = () => {
-      setShipPosition((current) => {
-        const next = current.clone()
-        const speed = 0.34
-        const forward = keys.current.has("w") || keys.current.has("arrowup")
-        const backward = keys.current.has("s") || keys.current.has("arrowdown")
-        const left = keys.current.has("a") || keys.current.has("arrowleft")
-        const right = keys.current.has("d") || keys.current.has("arrowright")
-
-        if (forward) next.z -= speed
-        if (backward) next.z += speed
-        if (left) next.x -= speed
-        if (right) next.x += speed
-
-        next.x = THREE.MathUtils.clamp(next.x, -46, 46)
-        next.z = THREE.MathUtils.clamp(next.z, -58, 18)
-        return next
-      })
-
-      raf = window.requestAnimationFrame(step)
-    }
-
-    raf = window.requestAnimationFrame(step)
-    return () => window.cancelAnimationFrame(raf)
-  }, [])
-
-  const nearest = useMemo(() => {
-    return planets
-      .map((planet) => ({ planet, distance: shipPosition.distanceTo(new THREE.Vector3(...planet.position)) }))
-      .sort((a, b) => a.distance - b.distance)[0]
-  }, [shipPosition])
-
-  const canDock = nearest.distance < nearest.planet.radius + 2.8
-  const xp = Object.values(unlocked).filter(Boolean).length * 25
-  const section = sectionContent[activeSection]
-
-  function dockNearest() {
-    if (!canDock) return
-    setActiveSection(nearest.planet.id)
-    setUnlocked((current) => ({ ...current, [nearest.planet.id]: true }))
-  }
 
   return (
-    <div className="relative h-full w-full overflow-hidden bg-[#050814] text-white">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_15%,rgba(74,243,255,0.18),transparent_28%),radial-gradient(circle_at_82%_10%,rgba(245,200,66,0.14),transparent_24%),radial-gradient(circle_at_50%_78%,rgba(61,220,132,0.12),transparent_28%)]" />
-      <Canvas className="absolute inset-0" camera={{ position: [0, 5.5, 18], fov: 58 }}>
-        <SpaceScene shipPosition={shipPosition} activeSection={activeSection} unlocked={unlocked} />
-      </Canvas>
+    <div style={{
+      position: "fixed", bottom: 24, left: "50%", transform: "translateX(-50%)",
+      zIndex: 22, display: "flex", alignItems: "center", gap: 16,
+    }}>
+      <button id="nav-prev" onClick={() => onNav(-1)} style={btn(canPrev)} aria-label="Previous">←</button>
 
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_bottom,rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:120px_120px] opacity-30" />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_35%,rgba(0,0,0,0.52)_100%)]" />
+      {/* Planet dots */}
+      <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+        {STOPS.map((_, i) => {
+          const active = i === currentIndex
+          const color  = i === 0 ? "#ffffff" : (SECTIONS[i - 1]?.color ?? "#fff")
+          return (
+            <div key={i} style={{
+              width: active ? 26 : 8, height: 8, borderRadius: 4,
+              background: active ? color : "rgba(255,255,255,0.22)",
+              boxShadow: active ? `0 0 10px ${color}90` : "none",
+              transition: "width 0.3s, background 0.3s, box-shadow 0.3s",
+            }} />
+          )
+        })}
+      </div>
 
-      <header className="pointer-events-none absolute left-4 right-4 top-4 z-10 flex items-start justify-between gap-4 md:left-8 md:right-8 md:top-6">
-        <div className="max-w-xl rounded-3xl border border-white/15 bg-black/50 p-4 backdrop-blur-xl md:p-5">
-          <div className="text-[11px] uppercase tracking-[0.35em] text-[#4af3ff]">Space Career Quest</div>
-          <h1 className="mt-2 font-display text-2xl md:text-4xl">Travel the galaxy in 3D</h1>
-          <p className="mt-2 text-sm leading-6 text-white/75 md:text-base">
-            Pilot the character with WASD or arrow keys, fly toward a planet, and dock to unlock that part of the portfolio.
-          </p>
-        </div>
+      <button id="nav-next" onClick={() => onNav(1)} style={btn(canNext)} aria-label="Next">→</button>
+    </div>
+  )
+}
 
-        <div className="rounded-3xl border border-white/15 bg-black/50 px-4 py-3 text-right backdrop-blur-xl md:px-5">
-          <div className="text-[11px] uppercase tracking-[0.3em] text-white/60">XP</div>
-          <div className="font-display text-3xl text-[#f5c842]">{xp}</div>
-        </div>
-      </header>
+/* ─────────────────────────────────────────────────────
+   BOTTOM LINKS
+   ───────────────────────────────────────────────────── */
+function BottomLinks() {
+  const base: React.CSSProperties = {
+    display: "inline-flex", alignItems: "center", gap: 6,
+    padding: "7px 18px", borderRadius: 999, fontSize: 11,
+    fontFamily: "'Share Tech Mono', monospace", letterSpacing: "0.2em",
+    textDecoration: "none", backdropFilter: "blur(12px)", transition: "background 0.2s",
+  }
+  return (
+    <div style={{ position: "fixed", bottom: 80, left: 24, zIndex: 20, display: "flex", gap: 10, flexWrap: "wrap" }}>
+      <a href="mailto:abishek02781@gmail.com"
+        style={{ ...base, border: "1px solid rgba(61,220,132,0.4)", background: "rgba(61,220,132,0.12)", color: "#c8ffe0" }}
+        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "rgba(61,220,132,0.22)" }}
+        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "rgba(61,220,132,0.12)" }}>
+        📧 RECRUIT ME
+      </a>
+      <a href="https://github.com/abishek2429" target="_blank" rel="noreferrer"
+        style={{ ...base, border: "1px solid rgba(255,255,255,0.18)", background: "rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.85)" }}
+        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.14)" }}
+        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "rgba(255,255,255,0.07)" }}>
+        💻 GITHUB
+      </a>
+      <a href="https://linkedin.com/in/abishek-s-a86209247" target="_blank" rel="noreferrer"
+        style={{ ...base, border: "1px solid rgba(96,165,250,0.38)", background: "rgba(96,165,250,0.10)", color: "#bfdbfe" }}
+        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "rgba(96,165,250,0.18)" }}
+        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "rgba(96,165,250,0.10)" }}>
+        🔗 LINKEDIN
+      </a>
+    </div>
+  )
+}
 
-      <aside className="pointer-events-none absolute left-4 top-[42%] z-10 w-[min(92vw,24rem)] -translate-y-1/2 space-y-3 md:left-8 md:w-[26rem]">
-        <div className="rounded-3xl border border-white/15 bg-black/50 p-4 backdrop-blur-xl">
-          <div className="flex items-center gap-2 text-[11px] uppercase tracking-[0.3em] text-[#4af3ff]">
-            <Rocket className="h-4 w-4" />
-            Flight HUD
-          </div>
-          <div className="mt-3 text-sm text-white/82">Nearest planet: {nearest.planet.name}</div>
-          <div className="mt-1 text-sm text-white/68">Distance: {nearest.distance.toFixed(1)} units</div>
-          <div className="mt-1 text-sm text-white/68">{nearest.planet.description}</div>
-
-          <button
-            type="button"
-            className="pointer-events-auto mt-4 inline-flex items-center gap-2 rounded-full border border-[#4af3ff]/45 bg-[#4af3ff]/18 px-4 py-2 text-xs uppercase tracking-[0.24em] text-[#b7fbff] disabled:cursor-not-allowed disabled:opacity-45"
-            onClick={dockNearest}
-            disabled={!canDock}
-          >
-            Dock Now
-            <MapPinned className="h-4 w-4" />
-          </button>
-        </div>
-
-        <div className="rounded-3xl border border-white/15 bg-black/50 p-4 backdrop-blur-xl">
-          <div className="text-[11px] uppercase tracking-[0.3em] text-[#f5c842]">{section.title}</div>
-          <div className="mt-3 space-y-2">
-            {section.lines.map((line) => (
-              <div key={line} className="rounded-2xl border border-white/10 bg-white/6 px-3 py-2 text-sm text-white/82">
-                {line}
-              </div>
-            ))}
-          </div>
-        </div>
-      </aside>
-
-      <footer className="pointer-events-none absolute bottom-4 left-4 right-4 z-10 flex flex-col gap-3 md:left-8 md:right-8 md:flex-row md:items-end md:justify-between">
-        <div className="rounded-3xl border border-white/15 bg-black/50 p-4 backdrop-blur-xl">
-          <div className="text-[11px] uppercase tracking-[0.3em] text-white/55">Controls</div>
-          <div className="mt-2 text-sm text-white/75">WASD or arrow keys to steer. Dock near a planet to unlock it.</div>
-        </div>
-
-        <div className="pointer-events-auto flex flex-wrap gap-2">
-          <a
-            href="mailto:abishek02781@gmail.com"
-            className="inline-flex items-center gap-2 rounded-full border border-[#3ddc84]/40 bg-[#3ddc84]/18 px-4 py-2 text-xs uppercase tracking-[0.2em] text-[#c8ffe0]"
-          >
-            Recruit Me
-            <ArrowUpRight className="h-4 w-4" />
-          </a>
-          <a
-            href="https://github.com/abishek2429"
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/8 px-4 py-2 text-xs uppercase tracking-[0.2em] text-white"
-          >
-            GitHub
-            <ArrowUpRight className="h-4 w-4" />
-          </a>
-        </div>
-      </footer>
-
-      <div className="pointer-events-none absolute right-4 top-24 z-10 w-[min(92vw,18rem)] rounded-3xl border border-white/15 bg-black/50 p-4 backdrop-blur-xl md:right-8">
-        <div className="text-[11px] uppercase tracking-[0.3em] text-white/55">Sector status</div>
-        <div className="mt-2 grid gap-2 text-sm text-white/78">
-          <div>Home: {unlocked.home ? "Unlocked" : "Locked"}</div>
-          <div>Missions: {unlocked.missions ? "Unlocked" : "Locked"}</div>
-          <div>Skills: {unlocked.skills ? "Unlocked" : "Locked"}</div>
-          <div>Contact: {unlocked.contact ? "Unlocked" : "Locked"}</div>
-        </div>
+/* ─────────────────────────────────────────────────────
+   "CLICK PLANET" HINT  — shows when camera has arrived
+   ───────────────────────────────────────────────────── */
+function ClickHint({ visible }: { visible: boolean }) {
+  return (
+    <div style={{
+      position: "fixed", top: "50%", left: "50%",
+      transform: "translate(-50%, -50%)",
+      zIndex: 18, pointerEvents: "none",
+      opacity: visible ? 1 : 0, transition: "opacity 0.5s ease",
+      textAlign: "center",
+    }}>
+      <div style={{
+        padding: "6px 18px", borderRadius: 999,
+        border: "1px solid rgba(255,255,255,0.2)",
+        background: "rgba(4,5,18,0.7)", backdropFilter: "blur(10px)",
+        fontSize: 11, color: "rgba(255,255,255,0.55)",
+        fontFamily: "'Share Tech Mono', monospace", letterSpacing: "0.22em",
+      }}>
+        CLICK PLANET TO VIEW DETAILS
       </div>
     </div>
   )
 }
 
-export default App
+/* ─────────────────────────────────────────────────────
+   ROOT
+   ───────────────────────────────────────────────────── */
+export default function SpaceExplorer() {
+  const [launched, setLaunched]       = useState(false)
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const [cameraT, setCameraT]           = useState(0)
+  const [modalId, setModalId]           = useState<string | null>(null)
+
+  /* Refs for stale-closure-safe nav logic */
+  const isFlyingRef       = useRef(false)
+  const currentIndexRef   = useRef(0)
+  const lastNavTimeRef    = useRef(0)
+
+  /* Keep ref in sync */
+  useEffect(() => { currentIndexRef.current = currentIndex }, [currentIndex])
+
+  /* ── Camera position callback ── */
+  const handlePositionChange = useCallback((t: number) => {
+    setCameraT(t)
+    /* Flying = camera not yet arrived at target */
+    isFlyingRef.current = Math.abs(t - STOPS[currentIndexRef.current]) > 0.015
+  }, [])
+
+  /* ── Navigate ──
+     + 200 ms debounce so one wheel-tick doesn't fire twice  */
+  const navigate = useCallback((dir: 1 | -1) => {
+    const now = Date.now()
+    if (now - lastNavTimeRef.current < 400) return  // debounce 400ms
+    lastNavTimeRef.current = now
+
+    setCurrentIndex((prev) => {
+      const next = prev + dir
+      if (next < 0 || next >= STOPS.length) return prev
+      return next
+    })
+  }, [])
+
+  /* ── Input listeners (wheel / keyboard / touch) ── */
+  useEffect(() => {
+    if (!launched) return
+
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault()
+      navigate(e.deltaY > 0 ? 1 : -1)
+    }
+
+    let ty = 0
+    const onTouchStart = (e: TouchEvent) => { ty = e.touches[0].clientY }
+    const onTouchEnd   = (e: TouchEvent) => {
+      const diff = ty - e.changedTouches[0].clientY
+      if (Math.abs(diff) > 40) navigate(diff > 0 ? 1 : -1)
+    }
+
+    const onKey = (e: KeyboardEvent) => {
+      if (["ArrowDown","PageDown"," "].includes(e.key)) { e.preventDefault(); navigate(1) }
+      if (["ArrowUp","PageUp"].includes(e.key))          { e.preventDefault(); navigate(-1) }
+    }
+
+    window.addEventListener("wheel",      onWheel,      { passive: false })
+    window.addEventListener("touchstart", onTouchStart, { passive: true })
+    window.addEventListener("touchend",   onTouchEnd,   { passive: true })
+    window.addEventListener("keydown",    onKey)
+    return () => {
+      window.removeEventListener("wheel",      onWheel)
+      window.removeEventListener("touchstart", onTouchStart)
+      window.removeEventListener("touchend",   onTouchEnd)
+      window.removeEventListener("keydown",    onKey)
+    }
+  }, [launched, navigate])
+
+  const targetT     = STOPS[currentIndex]
+  const isFlying    = Math.abs(cameraT - targetT) > 0.015
+  const onAPlanet   = currentIndex > 0           // not at intro stop
+  const showHint    = onAPlanet && !isFlying && !modalId
+
+  return (
+    <div style={{ position: "relative", width: "100%", height: "100%", background: "#03040e", overflow: "hidden" }}>
+
+      {/* Three.js canvas */}
+      <Canvas
+        style={{ position: "absolute", inset: 0 }}
+        camera={{ position: [0, 4, 16], fov: 60, near: 0.1, far: 400 }}
+        gl={{ antialias: true, alpha: false }}
+      >
+        <Suspense fallback={null}>
+          <SpaceScene
+            targetT={targetT}
+            onPositionChange={handlePositionChange}
+            scrollOffset={cameraT}
+            onPlanetClick={(id) => setModalId(id)}
+          />
+        </Suspense>
+      </Canvas>
+
+      {/* Launch overlay */}
+      {!launched && <LaunchOverlay onComplete={() => setLaunched(true)} />}
+
+      {/* HUD (after launch) */}
+      {launched && (
+        <>
+          <TopHud currentIndex={currentIndex} cameraT={cameraT} />
+          <JourneyProgress scrollOffset={cameraT} />
+          <BottomLinks />
+          <NavArrows currentIndex={currentIndex} onNav={navigate} locked={isFlying} />
+          <ClickHint visible={showHint} />
+        </>
+      )}
+
+      {/* Planet modal (click-to-open) */}
+      <PlanetModal sectionId={modalId} onClose={() => setModalId(null)} />
+    </div>
+  )
+}

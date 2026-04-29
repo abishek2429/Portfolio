@@ -23,43 +23,43 @@ export default function LaunchOverlay({ onComplete }: LaunchOverlayProps) {
       setPhase("countdown")
       setStatus("SYSTEMS CHECK... OK")
       setCNum(3)
-    }, 900)
+    }, 200)
 
     const t2 = setTimeout(() => {
       setStatus("FUEL LOADED... 100%")
       setCNum(2)
-    }, 1700)
+    }, 600)
 
     const t3 = setTimeout(() => {
       setStatus("TRAJECTORY SET...")
       setCNum(1)
-    }, 2500)
+    }, 1000)
 
     const t4 = setTimeout(() => {
       setStatus("🚀 IGNITION!")
       setCNum(0)
-    }, 3200)
+    }, 1400)
 
     const t5 = setTimeout(() => {
       setPhase("launching")
       setStatus("↑ ENTERING ORBIT ↑")
-    }, 3600)
+    }, 1600)
 
     const t6 = setTimeout(() => {
       setPhase("fading")
-    }, 5800)
+    }, 2400)
 
     const t7 = setTimeout(() => {
       if (!doneRef.current) {
         doneRef.current = true
         onComplete()
       }
-    }, 6800)
+    }, 3200)
 
     return () => {
       [t1, t2, t3, t4, t5, t6, t7].forEach(clearTimeout)
     }
-  }, [onComplete])
+  }, [])
 
   /* Random stars */
   const stars = useMemo(

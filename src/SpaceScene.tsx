@@ -2,6 +2,7 @@ import { useRef, useState } from "react"
 import { useFrame } from "@react-three/fiber"
 import { Html, Stars } from "@react-three/drei"
 import * as THREE from "three"
+import { useMemo } from "react"
 import { SECTIONS, CAMERA_WAYPOINTS, type Section } from "./data"
 
 /* ──────────────────────────────────────────────────────
@@ -9,6 +10,208 @@ import { SECTIONS, CAMERA_WAYPOINTS, type Section } from "./data"
    ────────────────────────────────────────────────────── */
 function buildCurve() {
   return new THREE.CatmullRomCurve3(CAMERA_WAYPOINTS, false, "catmullrom", 0.5)
+}
+
+/* ──────────────────────────────────────────────────────
+   PLANET SHADER MATERIAL
+   ────────────────────────────────────────────────────── */
+const vertexShader = `
+  varying vec2 vUv;
+  varying vec3 vNormal;
+  varying vec3 vViewPosition;
+  varying vec3 vWorldPosition;
+  
+  void main() {
+    vUv = uv;
+    vNormal = normalize(normalMatrix * normal);
+    vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+    vViewPosition = -mvPosition.xyz;
+    vWorldPosition = (modelMatrix * vec4(position, 1.0)).xyz;
+    gl_Position = projectionMatrix * mvPosition;
+  }
+`;
+
+const fragmentShader = `
+  uniform float time;
+  uniform vec3 color1;
+  uniform vec3 color2;
+  uniform vec3 color3;
+  uniform vec3 glowColor;
+  uniform float hoverIntensity;
+  
+  varying vec2 vUv;
+  varying vec3 vNormal;
+  varying vec3 vViewPosition;
+  varying vec3 vWorldPosition;
+
+  // Hash function for noise
+  vec3 hash33(vec3 p) {
+      p = fract(p * vec3(443.897, 441.423, 437.195));
+      p += dot(p, p.yxz + 19.19);
+      return fract((p.xxy + p.yxx) * p.zyx);
+  }
+
+  // 3D Simplex noise
+  float snoise(vec3 p) {
+      const float K1 = 0.333333333;
+      const float K2 = 0.166666667;
+      
+      vec3 i = floor(p + (p.x + p.y + p.z) * K1);
+      vec3 d0 = p - (i - (i.x + i.y + i.z) * K2);
+      
+      vec3 e = step(vec3(0.0), d0 - d0.yzx);
+      vec3 i1 = e * (1.0 - e.zxy);
+      vec3 i2 = 1.0 - e.zxy * (1.0 - e);
+      
+      vec3 d1 = d0 - (i1 - 1.0 * K2);
+      vec3 d2 = d0 - (i2 - 2.0 * K2);
+      vec3 d3 = d0 - (1.0 - 3.0 * K2);
+      
+      vec4 h = max(0.6 - vec4(dot(d0, d0), dot(d1, d1), dot(d2, d2), dot(d3, d3)), 0.0);
+      vec4 n = h * h * h * h * vec4(
+          dot(d0, hash33(i) - 0.5),
+          dot(d1, hash33(i + i1) - 0.5),
+          dot(d2, hash33(i + i2) - 0.5),
+          dot(d3, hash33(i + 1.0) - 0.5)
+      );
+      
+      return dot(n, vec4(31.316));
+  }
+
+  // FBM (Fractal Brownian Motion)
+  float fbm(vec3 x) {
+    float v = 0.0;
+    float a = 0.5;
+    vec3 shift = vec3(100.0);
+    for (int i = 0; i < 6; ++i) {
+      v += a * snoise(x);
+      x = x * 2.0 + shift;
+      a *= 0.5;
+    }
+    return v;
+  }
+
+  // Cloud layer fbm
+  float cloudFbm(vec3 x) {
+    float v = 0.0;
+    float a = 0.5;
+    vec3 shift = vec3(200.0);
+    for (int i = 0; i < 4; ++i) {
+      v += a * snoise(x);
+      x = x * 2.5 + shift;
+      a *= 0.4;
+    }
+    return v;
+  }
+
+  void main() {
+    vec3 normal = normalize(vNormal);
+    vec3 viewDir = normalize(vViewPosition);
+    vec3 lightDir = normalize(vec3(1.0, 0.8, 0.6));
+    
+    // 1. Geography Noise (Land vs Ocean)
+    vec3 p = vWorldPosition * 0.45;
+    float terrain = fbm(p + time * 0.015);
+    
+    // 2. Map terrain to colors & specular
+    vec3 surfaceColor;
+    float specularStrength = 0.0;
+    float shininess = 1.0;
+    
+    if (terrain < -0.05) {
+      // Deep Ocean
+      surfaceColor = mix(color1 * 0.5, color1, smoothstep(-0.4, -0.05, terrain));
+      specularStrength = 0.8; // Water is highly reflective
+      shininess = 64.0;
+    } else if (terrain < 0.25) {
+      // Lowlands / Continents
+      surfaceColor = mix(color1, color2, smoothstep(-0.05, 0.25, terrain));
+      specularStrength = 0.1; // Land is matte
+      shininess = 4.0;
+    } else {
+      // Highlands / Mountains
+      surfaceColor = mix(color2, color3, smoothstep(0.25, 0.6, terrain));
+      specularStrength = 0.05;
+      shininess = 2.0;
+    }
+
+    // 3. Clouds
+    vec3 cp = vWorldPosition * 0.7;
+    // Rotate clouds slightly over time
+    float angle = time * 0.02;
+    mat2 rot = mat2(cos(angle), -sin(angle), sin(angle), cos(angle));
+    cp.xz = rot * cp.xz;
+    
+    float clouds = cloudFbm(cp);
+    clouds = smoothstep(0.1, 0.8, clouds); // Threshold clouds
+    
+    // Clouds block specular reflection from surface
+    specularStrength *= (1.0 - clouds * 0.8);
+    
+    // Mix clouds into surface color
+    vec3 cloudColor = vec3(0.95, 0.95, 1.0);
+    surfaceColor = mix(surfaceColor, cloudColor, clouds * 0.8);
+
+    // 4. Lighting Calculation
+    // Diffuse
+    float NdotL = max(dot(normal, lightDir), 0.0);
+    // Wrap lighting slightly for atmospheric scattering feel
+    float diffuse = NdotL * 0.8 + 0.2; 
+    
+    // Specular (Blinn-Phong)
+    vec3 halfVector = normalize(lightDir + viewDir);
+    float NdotH = max(dot(normal, halfVector), 0.0);
+    float specular = pow(NdotH, shininess) * specularStrength;
+    
+    // Ambient
+    float ambient = 0.2;
+    
+    vec3 finalColor = surfaceColor * (diffuse + ambient) + vec3(1.0) * specular;
+
+    // 5. Atmospheric Rim Lighting
+    float rimPower = 1.0 - max(dot(viewDir, normal), 0.0);
+    rimPower = smoothstep(0.5, 1.0, rimPower);
+    
+    // Outer glow from hover/active state
+    finalColor += glowColor * rimPower * 1.5;
+    finalColor += glowColor * hoverIntensity * 1.2;
+
+    // 6. Day/Night Term (Dark side of planet)
+    // Darken the side facing away from the light source
+    float shadowTerm = smoothstep(-0.2, 0.2, dot(normal, lightDir));
+    finalColor *= shadowTerm + 0.05; // Never completely black
+
+    gl_FragColor = vec4(finalColor, 1.0);
+  }
+`;
+
+function PlanetMaterial({ color1, color2, color3, glow, hovered, isActive }: any) {
+  const uniforms = useMemo(
+    () => ({
+      time: { value: 0 },
+      color1: { value: new THREE.Color(color1) },
+      color2: { value: new THREE.Color(color2) },
+      color3: { value: new THREE.Color(color3) },
+      glowColor: { value: new THREE.Color(glow) },
+      hoverIntensity: { value: 0 },
+    }),
+    [color1, color2, color3, glow]
+  );
+
+  useFrame((state) => {
+    uniforms.time.value = state.clock.elapsedTime;
+    const targetIntensity = hovered ? 0.3 : isActive ? 0.15 : 0.0;
+    // Lerp hover intensity
+    uniforms.hoverIntensity.value += (targetIntensity - uniforms.hoverIntensity.value) * 0.1;
+  });
+
+  return (
+    <shaderMaterial
+      vertexShader={vertexShader}
+      fragmentShader={fragmentShader}
+      uniforms={uniforms}
+    />
+  );
 }
 
 /* ──────────────────────────────────────────────────────
@@ -60,13 +263,14 @@ function Planet({
         onPointerOver={() => { setHovered(true); document.body.style.cursor = 'pointer' }}
         onPointerOut={() => { setHovered(false); document.body.style.cursor = 'auto' }}
       >
-        <sphereGeometry args={[section.radius, 64, 64]} />
-        <meshStandardMaterial
-          color={section.surfaceColors[1]}
-          emissive={section.color}
-          emissiveIntensity={hovered ? 0.65 : isActive ? 0.4 : 0.08 + proximity * 0.15}
-          roughness={0.68}
-          metalness={0.14}
+        <sphereGeometry args={[section.radius, 128, 128]} />
+        <PlanetMaterial
+          color1={section.surfaceColors[0]}
+          color2={section.surfaceColors[1]}
+          color3={section.surfaceColors[2]}
+          glow={section.color}
+          hovered={hovered}
+          isActive={isActive}
         />
       </mesh>
 

@@ -171,7 +171,7 @@ function linkStyle(color: string): React.CSSProperties {
    ───────────────────────────────────────────────────── */
 function TopHud({ currentIndex, cameraT }: { currentIndex: number; cameraT: number }) {
   const pct = Math.round(Math.min(cameraT / (STOPS[STOPS.length - 1] || 1), 1) * 100)
-  const s   = currentIndex > 0 ? SECTIONS[currentIndex - 1] : SECTIONS[0]
+  const s   = SECTIONS[currentIndex] || SECTIONS[0]
 
   return (
     <>
@@ -231,7 +231,7 @@ function NavArrows({
       <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
         {STOPS.map((_, i) => {
           const active = i === currentIndex
-          const color  = i === 0 ? "#ffffff" : (SECTIONS[i - 1]?.color ?? "#fff")
+          const color  = SECTIONS[i]?.color ?? "#fff"
           return (
             <div key={i} style={{
               width: active ? 26 : 8, height: 8, borderRadius: 4,
@@ -378,10 +378,9 @@ export default function SpaceExplorer() {
     }
   }, [launched, navigate])
 
-  const targetT     = STOPS[currentIndex]
+  const targetT     = STOPS[currentIndex] || 0
   const isFlying    = Math.abs(cameraT - targetT) > 0.015
-  const onAPlanet   = currentIndex > 0           // not at intro stop
-  const showHint    = onAPlanet && !isFlying && !modalId
+  const showHint    = !isFlying && !modalId
 
   return (
     <div style={{ position: "relative", width: "100%", height: "100%", background: "#03040e", overflow: "hidden" }}>

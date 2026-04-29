@@ -168,4 +168,4 @@ export const CAMERA_WAYPOINTS: THREE.Vector3[] = [
  * Snap stops for planet-to-planet navigation.
  * Index 0 = intro/launch (t=0), indices 1-5 = each planet's scrollT.
  */
-export const STOPS: number[] = [0, ...SECTIONS.map((s) => s.scrollT)]
+export const STOPS: number[] = [...SECTIONS.map((s) => s.scrollT)]

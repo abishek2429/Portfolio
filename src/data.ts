@@ -146,22 +146,22 @@ export const SECTIONS: Section[] = [
 export const CAMERA_WAYPOINTS: THREE.Vector3[] = [
   new THREE.Vector3(0, 4, 16),    // 0.00 – launch/start
   new THREE.Vector3(0, 2, 4),     // 0.06 – clearing atmosphere
-  new THREE.Vector3(1, 1, -8),    // 0.10 – deep space entry
-  new THREE.Vector3(3, 0.5, -17), // 0.14 – approaching p1
-  new THREE.Vector3(5, 0, -22),   // 0.17 – 📍 near planet 1 (About)
-  new THREE.Vector3(2, 0.5, -29), // 0.24 – departing
-  new THREE.Vector3(-4, 1.5, -35),// 0.30 – approaching p2
-  new THREE.Vector3(-7, 1.5, -40),// 0.34 – 📍 near planet 2 (Education)
-  new THREE.Vector3(-2, 0.5, -47),// 0.41 – departing
-  new THREE.Vector3(5, -0.5, -53),// 0.47 – approaching p3
-  new THREE.Vector3(9, -1.2, -58),// 0.52 – 📍 near planet 3 (Missions)
-  new THREE.Vector3(2, -0.3, -65),// 0.59 – departing
-  new THREE.Vector3(-5, 0.5, -71),// 0.65 – approaching p4
-  new THREE.Vector3(-8, 0.5, -76),// 0.70 – 📍 near planet 4 (Skills)
-  new THREE.Vector3(-2, 0.3, -83),// 0.78 – departing
-  new THREE.Vector3(1.5, 0.5, -87), // 0.84 – approaching p5
-  new THREE.Vector3(5, 0.8, -92),   // 0.88 – 📍 near planet 5 (Contact)
-  new THREE.Vector3(2, 2, -100),    // 0.95 – end of journey
+  new THREE.Vector3(0, 1, -8),    // 0.10 – deep space entry
+  new THREE.Vector3(0, 0, -17),   // 0.14 – approaching p1
+  new THREE.Vector3(0, 0, -22),   // 0.17 – 📍 near planet 1 (About)
+  new THREE.Vector3(0, 0, -29),   // 0.24 – departing
+  new THREE.Vector3(0, 0, -35),   // 0.30 – approaching p2
+  new THREE.Vector3(0, 0, -40),   // 0.34 – 📍 near planet 2 (Education)
+  new THREE.Vector3(0, 0, -47),   // 0.41 – departing
+  new THREE.Vector3(0, 0, -53),   // 0.47 – approaching p3
+  new THREE.Vector3(0, 0, -58),   // 0.52 – 📍 near planet 3 (Missions)
+  new THREE.Vector3(0, 0, -65),   // 0.59 – departing
+  new THREE.Vector3(0, 0, -71),   // 0.65 – approaching p4
+  new THREE.Vector3(0, 0, -76),   // 0.70 – 📍 near planet 4 (Skills)
+  new THREE.Vector3(0, 0, -83),   // 0.78 – departing
+  new THREE.Vector3(0, 0, -87),   // 0.84 – approaching p5
+  new THREE.Vector3(0, 0, -92),   // 0.88 – 📍 near planet 5 (Contact)
+  new THREE.Vector3(0, 0, -100),  // 0.95 – end of journey
 ]
 
 /**

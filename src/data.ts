@@ -55,7 +55,7 @@ export const SECTIONS: Section[] = [
     icon: "🎓",
     color: "#60a5fa",
     glowColor: "rgba(96,165,250,0.35)",
-    position: new THREE.Vector3(-5.5, 1.5, -40),
+    position: new THREE.Vector3(-5.5, 1.5, -50),
     radius: 2.1,
     scrollT: 0.34,
     surfaceColors: ["#07112a", "#14306e", "#7eb9ff"],

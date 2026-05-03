@@ -238,12 +238,10 @@ function Planet({
   useFrame((state) => {
     if (!bodyRef.current) return
     const t   = state.clock.elapsedTime
-    const bob = Math.sin(t * 1.1 + section.scrollT * 8) * 0.15
-    bodyRef.current.rotation.y += 0.0025
-    bodyRef.current.position.y = section.position.y + bob
-    if (atmRef.current)  atmRef.current.position.y  = section.position.y + bob
+    bodyRef.current.position.copy(section.position)
+    if (atmRef.current)  atmRef.current.position.copy(section.position)
     if (ringRef.current) {
-      ringRef.current.position.y = section.position.y + bob
+      ringRef.current.position.copy(section.position)
       ringRef.current.rotation.z += 0.0008
     }
     if (glowRef.current) {

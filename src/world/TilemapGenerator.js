@@ -91,8 +91,11 @@ export class TilemapGenerator {
    * @returns {number} Tile index or -1 if out of bounds
    */
   getTileAt(x, y) {
+    if (!this.grid || this.grid.length === 0) {
+      this.generate();
+    }
     if (x >= 0 && x < this.cols && y >= 0 && y < this.rows) {
-      return this.grid[y][x];
+      return this.grid[y]?.[x] ?? -1;
     }
     return -1;
   }

@@ -94,26 +94,72 @@ export const ASSET_MANIFEST = {
   },
 
   audio: {
+    // Music Tracks
+    'ambient-forest-day': {
+      path: '/assets/audio/ambient-forest-day.mp3',
+      loop: true,
+      description: 'Peaceful daytime forest ambient music (Foundation Clearing)'
+    },
+    'ambient-forest-tech': {
+      path: '/assets/audio/ambient-forest-tech.mp3',
+      loop: true,
+      description: 'Tech-themed forest ambient music (Web Dev Outpost & Mobile Valley)'
+    },
+    'ambient-forest-mystical': {
+      path: '/assets/audio/ambient-forest-mystical.mp3',
+      loop: true,
+      description: 'Ethereal ambient music (AI & ML Woods & Research Lab)'
+    },
+    'ambient-forest-night': {
+      path: '/assets/audio/ambient-forest-night.mp3',
+      loop: true,
+      description: 'Ethereal orchestral dark forest night mode ambient music'
+    },
+    'summit-triumph': {
+      path: '/assets/audio/summit-triumph.mp3',
+      loop: false,
+      description: 'Triumphant orchestral music for Summit Nexus'
+    },
+    'menu-ambient': {
+      path: '/assets/audio/menu-ambient.mp3',
+      loop: true,
+      description: 'Title screen and menu ambient background music'
+    },
     'ambient-forest': {
       path: '/assets/audio/ambient-forest.mp3',
       loop: true,
-      description: 'Atmospheric dark forest background ambient music'
+      description: 'Atmospheric dark forest background ambient music (legacy alias)'
     },
-    'zone-discovery': {
-      path: '/assets/audio/zone-discovery.mp3',
-      loop: false,
-      description: 'Jingle played upon entering a new forest biome'
-    },
-    'npc-dialogue': {
-      path: '/assets/audio/npc-dialogue.mp3',
-      loop: false,
-      description: 'Subtle chime when dialogue prompts open'
-    },
-    'footstep': {
-      path: '/assets/audio/footstep.mp3',
-      loop: false,
-      description: 'Rhythmic footstep SFX on forest terrain'
-    }
+
+    // UI Sounds
+    'ui-click': { path: '/assets/audio/ui-click.mp3', loop: false, description: 'Button click / select' },
+    'ui-hover': { path: '/assets/audio/ui-hover.mp3', loop: false, description: 'Button hover / highlight' },
+    'ui-confirm': { path: '/assets/audio/ui-confirm.mp3', loop: false, description: 'Confirm action / enter' },
+    'ui-back': { path: '/assets/audio/ui-back.mp3', loop: false, description: 'Back / close menu' },
+    'ui-achievement': { path: '/assets/audio/ui-achievement.mp3', loop: false, description: 'Achievement unlocked chime' },
+    'ui-milestone': { path: '/assets/audio/ui-milestone.mp3', loop: false, description: 'Milestone fanfare' },
+
+    // Player Movement Sounds
+    'footstep-grass-1': { path: '/assets/audio/footstep-grass-1.mp3', loop: false, description: 'Grass footstep variant 1' },
+    'footstep-grass-2': { path: '/assets/audio/footstep-grass-2.mp3', loop: false, description: 'Grass footstep variant 2' },
+    'footstep-grass-3': { path: '/assets/audio/footstep-grass-3.mp3', loop: false, description: 'Grass footstep variant 3' },
+    'footstep-stone-1': { path: '/assets/audio/footstep-stone-1.mp3', loop: false, description: 'Stone footstep variant 1' },
+    'footstep-stone-2': { path: '/assets/audio/footstep-stone-2.mp3', loop: false, description: 'Stone footstep variant 2' },
+    'footstep-stone-3': { path: '/assets/audio/footstep-stone-3.mp3', loop: false, description: 'Stone footstep variant 3' },
+    'footstep': { path: '/assets/audio/footstep.mp3', loop: false, description: 'Rhythmic footstep SFX on forest terrain' },
+
+    // Gameplay & Discovery
+    'npc-talk-start': { path: '/assets/audio/npc-talk-start.mp3', loop: false, description: 'NPC dialogue start chime' },
+    'npc-talk-end': { path: '/assets/audio/npc-talk-end.mp3', loop: false, description: 'NPC dialogue end chime' },
+    'npc-dialogue': { path: '/assets/audio/npc-dialogue.mp3', loop: false, description: 'Subtle chime when dialogue prompts open' },
+    'zone-discover': { path: '/assets/audio/zone-discover.mp3', loop: false, description: 'Zone discovered fanfare' },
+    'zone-discovery': { path: '/assets/audio/zone-discovery.mp3', loop: false, description: 'Zone discovery jingle (alias)' },
+    'project-click': { path: '/assets/audio/project-click.mp3', loop: false, description: 'Project card clicked' },
+    'easter-egg-found': { path: '/assets/audio/easter-egg-found.mp3', loop: false, description: 'Easter egg found chime' },
+
+    // Ambience Loops
+    'ambience-fireflies': { path: '/assets/audio/ambience-fireflies.mp3', loop: true, description: 'Gentle firefly ambience' },
+    'ambience-night-creatures': { path: '/assets/audio/ambience-night-creatures.mp3', loop: true, description: 'Night creatures, owls, and crickets' }
   },
 
   fonts: {

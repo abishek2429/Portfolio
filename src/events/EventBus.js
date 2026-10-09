@@ -10,16 +10,26 @@
 export const GAME_EVENTS = {
   PLAYER_MOVED: 'playerMoved',       // { x, y, zone }
   PLAYER_SPAWNED: 'playerSpawned',   // { startX, startY }
-  ZONE_ENTERED: 'zoneEntered',       // { zoneId, zoneName }
-  ZONE_EXITED: 'zoneExited'          // { zoneId }
+  ZONE_ENTERED: 'zoneEntered',       // { zoneId, zoneName, npcCount, projectCount }
+  ZONE_EXITED: 'zoneExited',         // { zoneId, zoneName }
+  ZONE_NAME_DISPLAYED: 'zoneNameDisplayed', // { zoneName, duration }
+  ZONE_DISCOVERED: 'zoneDiscovered', // { zoneId, zoneName, timestamp }
+  ZONE_VISITED: 'zoneVisited'        // { zoneId, zoneName }
 };
 
 export const NPC_EVENTS = {
-  INTERACTION_START: 'npcInteractionStart', // { npcId, npcName }
+  INTERACTION_START: 'npcInteractionStart', // { npcId, npcName, tier }
+  NPC_IN_RANGE: 'npcInRange',               // { npcId, npcName }
+  NPC_OUT_OF_RANGE: 'npcOutOfRange',         // { npcId }
+  DIALOGUE_STARTED: 'dialogueStarted',     // { npcId, npcName, zone }
+  DIALOGUE_BLOCK_SHOWN: 'dialogueBlockShown', // { blockIndex, totalBlocks, text }
+  DIALOGUE_ENDED: 'dialogueEnded',         // { npcId }
+  CONVERSATION_RECORDED: 'conversationRecorded', // { npcId, tier }
+  TIER_UNLOCKED: 'tierUnlocked',           // { npcId, tier, reason }
   DIALOGUE_TIER_1: 'dialogueTier1',         // { npcId, dialogueText }
   DIALOGUE_TIER_2: 'dialogueTier2',         // { npcId, dialogueText }
   DIALOGUE_TIER_3: 'dialogueTier3',         // { npcId, dialogueText }
-  INTERACTION_END: 'npcInteractionEnd'      // { npcId }
+  INTERACTION_END: 'npcInteractionEnd'      // { npcId, timeElapsed }
 };
 
 export const PROJECT_EVENTS = {
@@ -30,9 +40,22 @@ export const PROJECT_EVENTS = {
 
 export const PROGRESS_EVENTS = {
   ACHIEVEMENT_UNLOCKED: 'achievementUnlocked', // { achievementId, achievementName }
-  SUMMIT_UNLOCKED: 'summitUnlocked',           // {}
+  SUMMIT_UNLOCKED: 'summitUnlocked',           // { reason }
   NIGHT_MODE_UNLOCKED: 'nightModeUnlocked',     // {}
-  EASTER_EGG_FOUND: 'easterEggFound'           // { eggId, eggName }
+  NIGHT_MODE_TOGGLED: 'nightModeToggled',       // { enabled }
+  EASTER_EGG_FOUND: 'easterEggFound',           // { eggId, eggName }
+  UNLOCK_PROGRESS_CHANGED: 'unlockProgressChanged', // { zonesVisited, npcsMetCount }
+  PROGRESS_CHANGED: 'progressChanged',         // { newProgress, category, change, breakdown }
+  MILESTONE_UNLOCKED: 'milestoneUnlocked',     // { milestoneName, progress, timestamp }
+  STAGE_CHANGED: 'stageChanged',               // { newStage, progress, previousStage }
+  GAME_COMPLETE: 'gameComplete',               // { completionTime, stats }
+  ACHIEVEMENT_PROGRESS: 'achievementProgress', // { achievementId, progress, description }
+  EASTER_EGG_DISCOVERED: 'easterEggDiscovered', // { eggId, eggName, location }
+  EASTER_EGG_PROGRESS: 'easterEggProgress',     // { discovered, total }
+  BONUS_CONTENT_UNLOCKED: 'bonusContentUnlocked', // { eggId, contentType }
+  UNLOCK_CONDITION_MET: 'unlockConditionMet',   // { targetId, targetType, reason }
+  MILESTONE_REACHED: 'milestoneReached',       // { milestoneId, milestoneName, reward }
+  REWARD_DISPENSED: 'rewardDispensed'          // { milestoneId, rewardType, rewardDetails }
 };
 
 export const STATE_EVENTS = {

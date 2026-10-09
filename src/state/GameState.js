@@ -29,6 +29,7 @@ export const INITIAL_STATE = {
   npcsInteracted: {},
   projectsClicked: [],
   achievementsUnlocked: [],
+  easterEggsFound: [],
   playerPosition: { x: 600, y: 400 },
   currentZone: ZONES.FOUNDATION,
   gameProgress: 0,
@@ -55,6 +56,7 @@ export class GameState {
     this.npcsInteracted = { ...(overrides.npcsInteracted || INITIAL_STATE.npcsInteracted) };
     this.projectsClicked = [...(overrides.projectsClicked || INITIAL_STATE.projectsClicked)];
     this.achievementsUnlocked = [...(overrides.achievementsUnlocked || INITIAL_STATE.achievementsUnlocked)];
+    this.easterEggsFound = [...(overrides.easterEggsFound || INITIAL_STATE.easterEggsFound)];
     this.playerPosition = { ...(overrides.playerPosition || INITIAL_STATE.playerPosition) };
     this.currentZone = overrides.currentZone || INITIAL_STATE.currentZone;
     this.unlocks = { ...(overrides.unlocks || INITIAL_STATE.unlocks) };
@@ -164,6 +166,27 @@ export class GameState {
   }
 
   /**
+   * Records discovery of an easter egg or secret in the world.
+   * @param {string} eggId - Easter egg ID (e.g. 'nightmode', 'shrine')
+   * @returns {boolean} True if newly discovered
+   */
+  findEasterEgg(eggId) {
+    if (!eggId) return false;
+
+    if (!this.easterEggsFound.includes(eggId)) {
+      this.easterEggsFound.push(eggId);
+      if (eggId === 'nightmode') {
+        this.unlocks.nightModeUnlocked = true;
+      }
+      this._emit('easterEggFound', { eggId, allEggs: [...this.easterEggsFound] });
+      this._emit('stateChange', this.getCurrentState());
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
    * Updates player coordinates in the world.
    * @param {number} x - X coordinate
    * @param {number} y - Y coordinate
@@ -220,10 +243,11 @@ export class GameState {
    * @private
    */
   _updateUnlocks() {
-    const lowerZones = [ZONES.FOUNDATION, ZONES.WEBDEV, ZONES.AIML, ZONES.MOBILE];
-    const hasAllLowerZones = lowerZones.every(z => this.zonesVisited.includes(z));
+    const visitedLowerZonesCount = this.zonesVisited.filter(z => z !== ZONES.SUMMIT).length;
+    const npcsMetCount = Object.values(this.npcsInteracted).filter(tier => Number(tier) > 0).length;
+    const meetsSummitCondition = visitedLowerZonesCount >= 3 && npcsMetCount >= 2;
 
-    if (hasAllLowerZones && !this.unlocks.summitAccessible) {
+    if (meetsSummitCondition && !this.unlocks.summitAccessible) {
       this.unlocks.summitAccessible = true;
       this._emit('unlockGained', { unlockKey: 'summitAccessible', value: true });
     }
@@ -244,6 +268,7 @@ export class GameState {
       npcsInteracted: { ...this.npcsInteracted },
       projectsClicked: [...this.projectsClicked],
       achievementsUnlocked: [...this.achievementsUnlocked],
+      easterEggsFound: [...this.easterEggsFound],
       playerPosition: { ...this.playerPosition },
       currentZone: this.currentZone,
       gameProgress: this.gameProgress,
@@ -300,7 +325,11 @@ export class GameState {
         eventBus.emit(STATE_EVENTS.GAME_STATE_CHANGED, { newState: this.getCurrentState() });
         eventBus.emit(STATE_EVENTS.PROGRESS_UPDATED, { progress: this.gameProgress });
       } else if (event === 'zoneChanged') {
-        eventBus.emit(GAME_EVENTS.ZONE_ENTERED, { zoneId: payload.currentZone });
+        // Canonical zoneEntered / zoneExited events are managed by ZoneVisualizer (Prompt 30)
+      } else if (event === 'easterEggFound') {
+        eventBus.emit(PROGRESS_EVENTS.EASTER_EGG_FOUND, {
+          eggId: payload.eggId
+        });
       } else if (event === 'achievementUnlocked') {
         eventBus.emit(PROGRESS_EVENTS.ACHIEVEMENT_UNLOCKED, {
           achievementId: payload.achievementId

@@ -9,6 +9,7 @@
 import { Player } from './Player.js';
 import CONFIG from '../config/GameConfig.js';
 import { spawnPointManager } from '../world/SpawnPointManager.js';
+import { animationStateMachine } from '../animation/AnimationStateMachine.js';
 
 export const PLAYER_ANIMATIONS = {
   IDLE_UP: 'idle-up',
@@ -193,7 +194,11 @@ export class PlayerCharacter {
 
   _syncAnimation() {
     const animKey = `${this.animState}-${this.direction}`;
-    this.playAnimation(animKey);
+    if (this.sprite) {
+      animationStateMachine.setAnimationState(this.sprite, this.animState, this.direction);
+    } else {
+      this.playAnimation(animKey);
+    }
   }
 
   _initAnimations(scene) {

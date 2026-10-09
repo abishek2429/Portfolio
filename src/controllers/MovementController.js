@@ -11,6 +11,7 @@ import eventBus, { GAME_EVENTS } from '../events/EventBus.js';
 import CONFIG from '../config/GameConfig.js';
 import { collisionLayer } from '../physics/CollisionLayer.js';
 import { zoneLayoutPlanner } from '../world/ZoneLayoutPlanner.js';
+import { inputHandler } from '../input/InputHandler.js';
 
 export class MovementController {
   constructor() {
@@ -146,14 +147,32 @@ export class MovementController {
    * @returns {{ vx: number, vy: number, direction: string|null }}
    */
   handleInput() {
-    if (!this.keys) return { vx: 0, vy: 0, direction: null };
+    let up = false;
+    let down = false;
+    let left = false;
+    let right = false;
 
-    const { cursors, wasd } = this.keys;
+    // 1. Query centralized InputHandler
+    if (inputHandler && typeof inputHandler.getMovementInput === 'function') {
+      const move = inputHandler.getMovementInput();
+      up = move.up;
+      down = move.down;
+      left = move.left;
+      right = move.right;
+    }
 
-    const up = cursors.up.isDown || wasd.up.isDown;
-    const down = cursors.down.isDown || wasd.down.isDown;
-    const left = cursors.left.isDown || wasd.left.isDown;
-    const right = cursors.right.isDown || wasd.right.isDown;
+    // 2. Direct cursor/WASD fallback if inputHandler inactive
+    if (!up && !down && !left && !right && this.keys) {
+      const { cursors, wasd } = this.keys;
+      up = cursors.up.isDown || wasd.up.isDown;
+      down = cursors.down.isDown || wasd.down.isDown;
+      left = cursors.left.isDown || wasd.left.isDown;
+      right = cursors.right.isDown || wasd.right.isDown;
+    }
+
+    if (!up && !down && !left && !right) {
+      return { vx: 0, vy: 0, direction: null };
+    }
 
     let dirX = 0;
     let dirY = 0;

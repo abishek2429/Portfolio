@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <rect width="1200" height="630" fill="#F2E9DC"/>
+  <rect x="40" y="40" width="1120" height="550" rx="6" fill="#E5D5C1" stroke="#5C4033" stroke-width="2" stroke-opacity="0.3"/>
+  
+  <!-- Masthead -->
+  <line x1="40" y1="120" x2="1160" y2="120" stroke="#5C4033" stroke-width="1.5" stroke-opacity="0.2"/>
+  <circle cx="80" cy="80" r="6" fill="#C19A6B"/>
+  <text x="100" y="86" font-family="monospace" font-size="16" fill="#5C4033" letter-spacing="2">ABISHEK.APP // SOFTWARE DEVELOPER FOLIO</text>
+  <text x="960" y="86" font-family="monospace" font-size="14" fill="#8B6F52">COIMBATORE, IN</text>
+
+  <!-- Big Title -->
+  <text x="80" y="240" font-family="serif" font-size="76" font-weight="600" fill="#352820">ABISHEK S</text>
+  <text x="80" y="310" font-family="serif" font-size="34" font-style="italic" fill="#5C4033">Software Developer &amp; Backend Engineer</text>
+  
+  <line x1="80" y1="360" x2="1120" y2="360" stroke="#5C4033" stroke-width="1" stroke-opacity="0.2"/>
+
+  <!-- Subtitle / Focus -->
+  <text x="80" y="420" font-family="sans-serif" font-size="20" fill="#8B6F52" font-weight="300">
+    Backend Engineering • Application Development • Algorithms • Cloud &amp; Systems
+  </text>
+  
+  <!-- Projects Badge -->
+  <rect x="80" y="460" width="180" height="42" rx="4" fill="#352820"/>
+  <text x="170" y="486" font-family="monospace" font-size="14" fill="#F2E9DC" text-anchor="middle">REPSI</text>
+
+  <rect x="280" y="460" width="180" height="42" rx="4" fill="#352820"/>
+  <text x="370" y="486" font-family="monospace" font-size="14" fill="#F2E9DC" text-anchor="middle">CODEXCAPE</text>
+
+  <rect x="480" y="460" width="180" height="42" rx="4" fill="#352820"/>
+  <text x="570" y="486" font-family="monospace" font-size="14" fill="#F2E9DC" text-anchor="middle">EDUVAULT</text>
+  
+  <text x="1120" y="486" font-family="monospace" font-size="14" fill="#5C4033" text-anchor="end">PSG TECH • MCA</text>
+</svg>

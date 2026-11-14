@@ -47,7 +47,7 @@ export const Footer: React.FC = () => {
         <div className="border-b border-cream/15 pb-16 mb-16 space-y-8">
           <div className="flex items-center gap-2 font-mono text-xs uppercase tracking-widest text-caramel font-semibold">
             <Sparkles className="w-4 h-4" />
-            <span>§ 04 / Direct Transmission</span>
+            <span>§ 03 / Direct Transmission</span>
           </div>
 
           <h2 className="font-serif text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-normal leading-[1.05] tracking-tight">

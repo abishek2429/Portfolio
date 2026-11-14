@@ -1,7 +1,86 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useRef } from 'react';
+import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { ArrowUpRight, Clock, Sparkles } from 'lucide-react';
 import { projectsData, ProjectItem, getProjectAction } from '../data/projectsData';
+
+// Interactive 3D Tilt Preview Card Component
+interface ProjectPreviewCardProps {
+  project: ProjectItem;
+  action: ReturnType<typeof getProjectAction>;
+  onExplore: () => void;
+}
+
+const ProjectPreviewCard: React.FC<ProjectPreviewCardProps> = ({ project, action, onExplore }) => {
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  // Motion values for smooth 3D tilt
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  const springConfig = { damping: 20, stiffness: 200 };
+  const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [7, -7]), springConfig);
+  const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-7, 7]), springConfig);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const xPct = (e.clientX - rect.left) / rect.width - 0.5;
+    const yPct = (e.clientY - rect.top) / rect.height - 0.5;
+    mouseX.set(xPct);
+    mouseY.set(yPct);
+  };
+
+  const handleMouseLeave = () => {
+    mouseX.set(0);
+    mouseY.set(0);
+  };
+
+  return (
+    <div
+      style={{ perspective: 1000 }}
+      className={`relative w-full ${action.isAvailable ? 'cursor-pointer' : 'cursor-default'}`}
+      onClick={() => action.isAvailable && onExplore()}
+    >
+      <motion.div
+        ref={cardRef}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+        style={{
+          rotateX,
+          rotateY,
+          transformStyle: 'preserve-3d',
+        }}
+        className="relative overflow-hidden rounded-2xl border border-deepBrown/15 bg-beige/35 shadow-editorial hover:shadow-editorial-hover transition-shadow duration-500"
+      >
+        <div className="aspect-[16/10] w-full overflow-hidden relative">
+          <img
+            src={project.previewImage}
+            alt={`${project.name} Visual Composition`}
+            className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+            loading="lazy"
+          />
+
+          {/* Interactive Floating Pill Overlay */}
+          {action.isAvailable ? (
+            <div className="absolute inset-0 bg-espresso/15 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
+              <div className="px-5 py-2.5 rounded-full bg-cream/95 backdrop-blur-md border border-deepBrown/20 text-espresso text-xs font-mono font-medium shadow-sm inline-flex items-center gap-2 group-hover:scale-105 transition-transform">
+                <span>{action.label}</span>
+                <ArrowUpRight className="w-3.5 h-3.5 text-caramel" />
+              </div>
+            </div>
+          ) : (
+            <div className="absolute top-5 right-5">
+              <span className="px-3.5 py-1.5 rounded-full bg-cream/90 backdrop-blur-md border border-deepBrown/20 font-mono text-[11px] text-mutedBrown flex items-center gap-1.5 shadow-sm">
+                <Clock className="w-3 h-3 text-caramel" />
+                <span>Coming Soon</span>
+              </span>
+            </div>
+          )}
+        </div>
+      </motion.div>
+    </div>
+  );
+};
 
 export const ProjectsShowcase: React.FC = () => {
   const handleExploreClick = (project: ProjectItem) => {
@@ -13,7 +92,7 @@ export const ProjectsShowcase: React.FC = () => {
 
   return (
     <section id="projects" className="py-28 md:py-36 border-t border-deepBrown/15 relative overflow-hidden">
-      {/* Background Subtle Ambience */}
+      {/* Background Subtle Ambiance */}
       <div className="absolute inset-0 pointer-events-none -z-10">
         <div className="absolute top-1/4 right-0 w-[600px] h-[500px] bg-caramel/10 rounded-full blur-[140px]" />
         <div className="absolute bottom-1/4 left-0 w-[500px] h-[400px] bg-beige/40 rounded-full blur-[120px]" />
@@ -63,38 +142,13 @@ export const ProjectsShowcase: React.FC = () => {
                   isEven ? 'lg:grid-flow-dense' : ''
                 }`}>
                   
-                  {/* Large Visual Preview Canvas */}
-                  <div
-                    onClick={() => action.isAvailable && handleExploreClick(project)}
-                    className={`lg:col-span-7 relative overflow-hidden rounded-2xl border border-deepBrown/20 bg-beige/35 shadow-editorial transition-all duration-700 ease-out group-hover:border-deepBrown/40 group-hover:shadow-editorial-hover ${
-                      isEven ? 'lg:col-start-6' : ''
-                    } ${action.isAvailable ? 'cursor-pointer' : 'cursor-default'}`}
-                  >
-                    <div className="aspect-[16/10] w-full overflow-hidden relative">
-                      <img
-                        src={project.previewImage}
-                        alt={`${project.name} Visual Preview`}
-                        className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
-                        loading="lazy"
-                      />
-
-                      {/* Subtle Floating Interactive Overlay on Hover (Only if active) */}
-                      {action.isAvailable ? (
-                        <div className="absolute inset-0 bg-espresso/15 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
-                          <div className="px-5 py-2.5 rounded-full bg-cream/95 backdrop-blur-md border border-deepBrown/20 text-espresso text-xs font-mono font-medium shadow-sm inline-flex items-center gap-2 group-hover:scale-105 transition-transform">
-                            <span>{action.label}</span>
-                            <ArrowUpRight className="w-3.5 h-3.5 text-caramel" />
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="absolute top-5 right-5">
-                          <span className="px-3.5 py-1.5 rounded-full bg-cream/90 backdrop-blur-md border border-deepBrown/20 font-mono text-[11px] text-mutedBrown flex items-center gap-1.5 shadow-sm">
-                            <Clock className="w-3 h-3 text-caramel" />
-                            <span>Coming Soon</span>
-                          </span>
-                        </div>
-                      )}
-                    </div>
+                  {/* Large Visual Preview Canvas with 3D Tilt */}
+                  <div className={`lg:col-span-7 ${isEven ? 'lg:col-start-6' : ''}`}>
+                    <ProjectPreviewCard
+                      project={project}
+                      action={action}
+                      onExplore={() => handleExploreClick(project)}
+                    />
                   </div>
 
                   {/* Project Exhibition Info (Name, One Short Sentence, Subtle Explore Interaction) */}

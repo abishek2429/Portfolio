@@ -92,7 +92,7 @@ export const Hero: React.FC = () => {
                 className="group inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cream hover:bg-beige border border-deepBrown/15 hover:border-caramel text-xs font-mono text-espresso transition-all shadow-sm active:scale-95"
               >
                 <span className="text-caramel font-bold">0{idx + 1}</span>
-                <span className="font-semibold">{project.title}</span>
+                <span className="font-semibold">{project.name}</span>
                 <span className="text-[10px] text-mutedBrown hidden sm:inline">
                   [{project.category.split(' ')[0]}]
                 </span>

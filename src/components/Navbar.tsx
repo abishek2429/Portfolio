@@ -19,10 +19,9 @@ export const Navbar: React.FC<NavbarProps> = ({ activeSection }) => {
   });
 
   const navLinks = [
-    { id: 'projects', label: 'Selected Works', num: '01' },
-    { id: 'index-table', label: 'Archive / Index', num: '02' },
-    { id: 'identity', label: 'Identity & Craft', num: '03' },
-    { id: 'contact', label: 'Connect', num: '04' },
+    { id: 'projects', label: 'Projects', num: '01' },
+    { id: 'identity', label: 'Identity & Craft', num: '02' },
+    { id: 'contact', label: 'Contact', num: '03' },
   ];
 
   return (

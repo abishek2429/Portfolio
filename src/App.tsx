@@ -2,19 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
 import { ProjectsShowcase } from './components/ProjectsShowcase';
-import { ProjectIndexTable } from './components/ProjectIndexTable';
 import { Identity } from './components/Identity';
 import { Footer } from './components/Footer';
-import { ProjectDetailModal } from './components/ProjectDetailModal';
 import { CustomCursor } from './components/CustomCursor';
-import { Project } from './data/projectsData';
 
 export const App: React.FC = () => {
   const [activeSection, setActiveSection] = useState<string>('home');
-  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
   useEffect(() => {
-    const sections = ['home', 'projects', 'index-table', 'identity', 'contact'];
+    const sections = ['home', 'projects', 'identity', 'contact'];
 
     const observerCallback: IntersectionObserverCallback = (entries) => {
       entries.forEach((entry) => {
@@ -65,32 +61,23 @@ export const App: React.FC = () => {
         Skip to Projects
       </a>
 
-      {/* Floating Island Navigation */}
+      {/* Floating Dynamic Island Navigation */}
       <Navbar activeSection={activeSection} />
 
-      {/* Main Stream */}
+      {/* Main Exhibition Stream */}
       <main id="main-content" className="flex-grow">
-        {/* 1. Creative Hero: Who I am, what I create, direct project links */}
+        {/* 1. Creative Hero: Who I am, what I create, and direct project access */}
         <Hero />
 
-        {/* 2. Curated Architectural Exhibit: Full-bleed project showcase */}
-        <ProjectsShowcase onSelectProject={(project) => setSelectedProject(project)} />
+        {/* 2. Main Project Showcase: Visual Exhibition of RepSI, CodeXcape, and EduVault */}
+        <ProjectsShowcase />
 
-        {/* 3. Interactive Project Directory: Table with floating hover previews */}
-        <ProjectIndexTable onSelectProject={(project) => setSelectedProject(project)} />
-
-        {/* 4. Concise Identity & Craft: Core disciplines & PSG Tech credentials */}
+        {/* 3. Concise Identity & Craft: Core disciplines & PSG Tech credentials */}
         <Identity />
       </main>
 
-      {/* 5. Grand Editorial Footer & Direct Connect */}
+      {/* 4. Grand Editorial Footer & Direct Connect */}
       <Footer />
-
-      {/* Architectural Monograph Modal */}
-      <ProjectDetailModal
-        project={selectedProject}
-        onClose={() => setSelectedProject(null)}
-      />
     </div>
   );
 };

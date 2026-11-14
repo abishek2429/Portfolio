@@ -11,6 +11,17 @@ export const Navbar: React.FC<NavbarProps> = ({ activeSection }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { profile } = portfolioData;
 
+  // Accessible Escape key listener to close mobile menu
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMobileMenuOpen(false);
+    };
+    if (mobileMenuOpen) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [mobileMenuOpen]);
+
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, {
     stiffness: 100,

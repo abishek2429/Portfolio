@@ -22,6 +22,8 @@ const ProjectPreviewCard: React.FC<ProjectPreviewCardProps> = ({ project, action
   const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-7, 7]), springConfig);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    // Disable 3D tilt on touch devices for silky smooth mobile scrolling
+    if (window.matchMedia('(pointer: coarse)').matches) return;
     if (!cardRef.current) return;
     const rect = cardRef.current.getBoundingClientRect();
     const xPct = (e.clientX - rect.left) / rect.width - 0.5;
@@ -40,6 +42,15 @@ const ProjectPreviewCard: React.FC<ProjectPreviewCardProps> = ({ project, action
       style={{ perspective: 1000 }}
       className={`relative w-full ${action.isAvailable ? 'cursor-pointer' : 'cursor-default'}`}
       onClick={() => action.isAvailable && onExplore()}
+      onKeyDown={(e) => {
+        if (action.isAvailable && (e.key === 'Enter' || e.key === ' ')) {
+          e.preventDefault();
+          onExplore();
+        }
+      }}
+      tabIndex={action.isAvailable ? 0 : -1}
+      role={action.isAvailable ? 'link' : undefined}
+      aria-label={action.isAvailable ? `${action.label} for ${project.name} in new tab` : `${project.name} - Coming Soon`}
     >
       <motion.div
         ref={cardRef}
@@ -50,7 +61,7 @@ const ProjectPreviewCard: React.FC<ProjectPreviewCardProps> = ({ project, action
           rotateY,
           transformStyle: 'preserve-3d',
         }}
-        className="relative overflow-hidden rounded-2xl border border-deepBrown/15 bg-beige/35 shadow-editorial hover:shadow-editorial-hover transition-shadow duration-500"
+        className="relative overflow-hidden rounded-2xl border border-deepBrown/15 bg-beige/35 shadow-editorial hover:shadow-editorial-hover transition-shadow duration-500 focus-visible:ring-2 focus-visible:ring-caramel"
       >
         <div className="aspect-[16/10] w-full overflow-hidden relative">
           <img
@@ -58,6 +69,7 @@ const ProjectPreviewCard: React.FC<ProjectPreviewCardProps> = ({ project, action
             alt={`${project.name} Visual Composition`}
             className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
             loading="lazy"
+            decoding="async"
           />
 
           {/* Interactive Floating Pill Overlay */}

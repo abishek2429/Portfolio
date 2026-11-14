@@ -1,20 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
-import { About } from './components/About';
-import { Education } from './components/Education';
-import { Projects } from './components/Projects';
-import { Skills } from './components/Skills';
-import { Goals } from './components/Goals';
-import { Contact } from './components/Contact';
+import { ProjectsShowcase } from './components/ProjectsShowcase';
+import { ProjectIndexTable } from './components/ProjectIndexTable';
+import { Identity } from './components/Identity';
 import { Footer } from './components/Footer';
+import { ProjectDetailModal } from './components/ProjectDetailModal';
+import { CustomCursor } from './components/CustomCursor';
+import { Project } from './data/projectsData';
 
 export const App: React.FC = () => {
   const [activeSection, setActiveSection] = useState<string>('home');
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
   useEffect(() => {
-    const sections = ['home', 'about', 'education', 'projects', 'skills', 'goals', 'contact'];
-    
+    const sections = ['home', 'projects', 'index-table', 'identity', 'contact'];
+
     const observerCallback: IntersectionObserverCallback = (entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
@@ -37,9 +38,9 @@ export const App: React.FC = () => {
     });
 
     const handleScroll = () => {
-      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 60) {
+      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 80) {
         setActiveSection('contact');
-      } else if (window.scrollY < 120) {
+      } else if (window.scrollY < 150) {
         setActiveSection('home');
       }
     };
@@ -52,34 +53,46 @@ export const App: React.FC = () => {
   }, []);
 
   return (
-    <div className="bg-cream text-espresso min-h-screen flex flex-col selection:bg-caramel/25 selection:text-espresso">
+    <div className="bg-cream text-espresso min-h-screen flex flex-col selection:bg-caramel/25 selection:text-espresso relative">
+      {/* Custom Magnetic Cursor */}
+      <CustomCursor />
+
       {/* Accessible Skip Link */}
       <a
-        href="#home"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-espresso focus:text-cream focus:rounded-sm focus:font-mono focus:text-xs focus:shadow-lg focus:ring-2 focus:ring-caramel"
+        href="#projects"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-espresso focus:text-cream focus:rounded-full focus:font-mono focus:text-xs focus:shadow-lg focus:ring-2 focus:ring-caramel"
       >
-        Skip to main content
+        Skip to Projects
       </a>
 
-      {/* Sticky Editorial Header */}
+      {/* Floating Island Navigation */}
       <Navbar activeSection={activeSection} />
 
-      {/* Main Editorial Content Stream */}
+      {/* Main Stream */}
       <main id="main-content" className="flex-grow">
+        {/* 1. Creative Hero: Who I am, what I create, direct project links */}
         <Hero />
-        <About />
-        <Education />
-        <Projects />
-        <Skills />
-        <Goals />
-        <Contact />
+
+        {/* 2. Curated Architectural Exhibit: Full-bleed project showcase */}
+        <ProjectsShowcase onSelectProject={(project) => setSelectedProject(project)} />
+
+        {/* 3. Interactive Project Directory: Table with floating hover previews */}
+        <ProjectIndexTable onSelectProject={(project) => setSelectedProject(project)} />
+
+        {/* 4. Concise Identity & Craft: Core disciplines & PSG Tech credentials */}
+        <Identity />
       </main>
 
-      {/* Colophon & Footer */}
+      {/* 5. Grand Editorial Footer & Direct Connect */}
       <Footer />
+
+      {/* Architectural Monograph Modal */}
+      <ProjectDetailModal
+        project={selectedProject}
+        onClose={() => setSelectedProject(null)}
+      />
     </div>
   );
 };
 
 export default App;
-

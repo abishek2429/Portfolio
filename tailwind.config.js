@@ -37,6 +37,21 @@ export default {
           light: '#D1AC80',
           dark: '#B08856',
         },
+        terracotta: {
+          DEFAULT: '#C86D51',
+          light: '#D6856C',
+          dark: '#A85338',
+        },
+        taupe: {
+          DEFAULT: '#B5A89B',
+          light: '#C7BCB0',
+          dark: '#9E9082',
+        },
+        chocolate: {
+          DEFAULT: '#241812',
+          light: '#2E2018',
+          dark: '#19110D',
+        },
       },
       fontFamily: {
         serif: ['Newsreader', 'Playfair Display', 'Georgia', 'serif'],
@@ -46,8 +61,10 @@ export default {
       },
       boxShadow: {
         'editorial': '0 2px 20px -2px rgba(53, 40, 32, 0.08)',
-        'editorial-hover': '0 12px 30px -4px rgba(53, 40, 32, 0.12)',
-        'editorial-card': '0 4px 20px -2px rgba(92, 64, 51, 0.06)',
+        'editorial-hover': '0 16px 36px -6px rgba(53, 40, 32, 0.16)',
+        'editorial-card': '0 4px 24px -2px rgba(92, 64, 51, 0.08)',
+        'glow-caramel': '0 0 25px -5px rgba(193, 154, 107, 0.35)',
+        'glow-terracotta': '0 0 25px -5px rgba(200, 109, 81, 0.35)',
       },
       letterSpacing: {
         'editorial-tight': '-0.025em',

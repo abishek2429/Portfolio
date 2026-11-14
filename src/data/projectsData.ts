@@ -9,6 +9,10 @@ export interface Project {
   id: string;
   title: string;
   category: string;
+  year?: string;
+  role?: string;
+  stats?: string;
+  accentColor?: string;
   description: string;
   detailed_description: ProjectDetailedDescription;
   technologies: string[];
@@ -23,6 +27,10 @@ export const projectsData: Project[] = [
     id: "repsi",
     title: "RepSI",
     category: "Enterprise SaaS & Fitness OS",
+    year: "2024",
+    role: "Backend Architect & System Engineer",
+    stats: "Multi-Tenant • <1.0s Scan Telemetry",
+    accentColor: "#C19A6B",
     description: "A production-grade Gym Management SaaS platform engineered with multi-tenant architecture, asynchronous FastAPI microservices, and direct payment reconciliation.",
     detailed_description: {
       overview: "RepSI is a comprehensive Gym Management SaaS platform built to unify facility operations, member lifecycles, and financial accounting. It provides multi-tenant workspace isolation, automated GST billing, member payment verification, and contactless QR check-ins across web and mobile ecosystems.",
@@ -92,6 +100,10 @@ export const projectsData: Project[] = [
     id: "codexcape",
     title: "CodeXcape",
     category: "Collaborative Web Application",
+    year: "2024",
+    role: "Full-Stack & Systems Engineer",
+    stats: "2-Player Sync • Live Sandbox Debugger",
+    accentColor: "#C86D51",
     description: "A gamified two-player cooperative coding escape room with real-time puzzle solving, sandbox debugging, and synchronized state telemetry.",
     detailed_description: {
       overview: "CodeXcape immerses developer pairs into a timed collaborative challenge where solving algorithmic puzzles and debugging sandbox code reveals hidden clues to unlock subsequent chambers. It explores real-time peer learning through interactive game design.",
@@ -146,6 +158,10 @@ export const projectsData: Project[] = [
     id: "eduvault",
     title: "EduVault",
     category: "Full-Stack Educational Platform",
+    year: "2023",
+    role: "Backend & Systems Developer",
+    stats: "ASAG NLP Grading • 3-Tier RBAC",
+    accentColor: "#8B6F52",
     description: "A collaborative educational platform and department-level LMS engineered with automated descriptive assessment evaluation and secure document vaulting.",
     detailed_description: {
       overview: "EduVault is a full-featured collaborative educational platform engineered to manage student submissions, streamline grading, and evaluate open-ended subjective assessments using semantic similarity pipelines.",
